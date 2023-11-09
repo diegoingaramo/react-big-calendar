@@ -300,8 +300,8 @@ export default function (dayjsLib) {
 
   // These two are used by eventLevels
   function sortEvents({
-    evtA: { start: aStart, end: aEnd, allDay: aAllDay },
-    evtB: { start: bStart, end: bEnd, allDay: bAllDay },
+    evtA: { start: aStart, end: aEnd, allDay: aAllDay, type: aType },
+    evtB: { start: bStart, end: bEnd, allDay: bAllDay, type: bType },
   }) {
     const startSort = +startOf(aStart, 'day') - +startOf(bStart, 'day')
 
@@ -309,7 +309,15 @@ export default function (dayjsLib) {
 
     const durB = diff(bStart, ceil(bEnd, 'day'), 'day')
 
+    let eventTypeSort = 0
+    if (aType === 'rates' && bType !== 'rates') {
+      eventTypeSort = -1
+    } else if (aType !== 'rates' && bType === 'rates') {
+      eventTypeSort = 1
+    }
+
     return (
+      eventTypeSort ||
       startSort || // sort by start Day first
       Math.max(durB, 1) - Math.max(durA, 1) || // events spanning multiple days go first
       !!bAllDay - !!aAllDay || // then allDay single day events

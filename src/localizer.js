@@ -89,8 +89,8 @@ function continuesAfter(start, end, last) {
 
 // These two are used by eventLevels
 function sortEvents({
-  evtA: { start: aStart, end: aEnd, allDay: aAllDay },
-  evtB: { start: bStart, end: bEnd, allDay: bAllDay },
+  evtA: { start: aStart, end: aEnd, allDay: aAllDay, type: aType },
+  evtB: { start: bStart, end: bEnd, allDay: bAllDay, type: bType },
 }) {
   let startSort = +startOf(aStart, 'day') - +startOf(bStart, 'day')
 
@@ -98,7 +98,16 @@ function sortEvents({
 
   let durB = diff(bStart, ceil(bEnd, 'day'), 'day')
 
+  let eventTypeSort = 0
+  if (aType === 'rates' && bType !== 'rates') {
+    eventTypeSort = -1
+  } else if (aType !== 'rates' && bType === 'rates') {
+    eventTypeSort = 1
+  }
+
   return (
+    eventTypeSort ||
+    //sort by event type first
     startSort || // sort by start Day first
     Math.max(durB, 1) - Math.max(durA, 1) || // events spanning multiple days go first
     !!bAllDay - !!aAllDay || // then allDay single day events
@@ -173,7 +182,7 @@ export class DateLocalizer {
 
     this.getSlotDate = spec.getSlotDate || getSlotDate
     this.getTimezoneOffset =
-      spec.getTimezoneOffset || (value => value.getTimezoneOffset())
+      spec.getTimezoneOffset || ((value) => value.getTimezoneOffset())
     this.getDstOffset = spec.getDstOffset || getDstOffset
     this.getTotalMin = spec.getTotalMin || getTotalMin
     this.getMinutesFromMidnight =
